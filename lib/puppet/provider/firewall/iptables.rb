@@ -60,6 +60,7 @@ Puppet::Type.type(:firewall).provide :iptables, :parent => Puppet::Provider::Fir
     :set_mark => mark_flag,
     :socket => "-m socket",
     :source => "-s",
+    :inverse_source => "! -s",
     :src_type => "-m addrtype --src-type",
     :sport => ["-m multiport --sports", "-m (udp|tcp) --sport"],
     :state => "-m state --state",
@@ -88,7 +89,7 @@ Puppet::Type.type(:firewall).provide :iptables, :parent => Puppet::Provider::Fir
   # we need it to properly parse and apply rules, if the order of resource
   # changes between puppet runs, the changed rules will be re-applied again.
   # This order can be determined by going through iptables source code or just tweaking and trying manually
-  @resource_list = [:table, :source, :destination, :iniface, :outiface,
+  @resource_list = [:table, :source, :inverse_source, :destination, :iniface, :outiface,
     :proto, :isfragment, :tcp_flags, :gid, :uid, :sport, :dport, :port,
     :dst_type, :src_type, :socket, :pkttype, :name, :state, :icmp,
     :limit, :burst, :jump, :todest, :tosource, :toports, :log_prefix,
@@ -202,7 +203,7 @@ Puppet::Type.type(:firewall).provide :iptables, :parent => Puppet::Provider::Fir
     #####################
 
     # Normalise all rules to CIDR notation.
-    [:source, :destination].each do |prop|
+    [:source, :inverse_source, :destination].each do |prop|
       hash[prop] = Puppet::Util::IPCidr.new(hash[prop]).cidr unless hash[prop].nil?
     end
 

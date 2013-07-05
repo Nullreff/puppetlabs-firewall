@@ -114,6 +114,24 @@ Puppet::Type.newtype(:firewall) do
     end
   end
 
+  newproperty(:inverse_source) do
+    desc <<-EOS
+      Inverted source address. For example:
+
+          inverse_source => '192.168.2.0/24'
+
+      The source can also be an IPv6 address if your provider supports it.
+    EOS
+
+    munge do |value|
+      begin
+        @resource.host_to_ip(value)
+      rescue Exception => e
+        self.fail("host_to_ip failed for #{value}, exception #{e}")
+      end
+    end
+  end
+
   newproperty(:destination) do
     desc <<-EOS
       The destination address to match. For example:
